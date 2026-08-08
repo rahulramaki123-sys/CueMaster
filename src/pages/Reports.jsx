@@ -1,82 +1,90 @@
+import RevenueChart from "../components/RevenueChart";
 const Reports = ({
   gameHistory,
   revenueToday,
   gamesToday,
 }) => {
 
+  // Total Customers
   const totalCustomers = new Set(
     gameHistory.map((game) => game.phoneNumber)
   ).size;
 
+  // Average Bill
   const averageBill =
     gameHistory.length > 0
       ? gameHistory.reduce(
-          (sum, game) => sum + game.charge,
+          (sum, game) => sum + Number(game.charge || 0),
           0
         ) / gameHistory.length
       : 0;
 
-  // Top Customer
+  // Customer Spending
   const customerTotals = {};
 
   gameHistory.forEach((game) => {
-    if (!customerTotals[game.customerName]) {
-      customerTotals[game.customerName] = 0;
+    const name = game.customerName || "Unknown";
+
+    if (!customerTotals[name]) {
+      customerTotals[name] = 0;
     }
 
-    customerTotals[game.customerName] += game.charge;
+    customerTotals[name] += Number(game.charge || 0);
   });
 
-  const topCustomer =
-    Object.entries(customerTotals).sort(
-      (a, b) => b[1] - a[1]
-    )[0];
+  const topCustomer = Object.entries(customerTotals).sort(
+    (a, b) => b[1] - a[1]
+  )[0];
 
-  // Most Used Table
+  // Table Usage
   const tableUsage = {};
 
   gameHistory.forEach((game) => {
-    if (!tableUsage[game.tableName]) {
-      tableUsage[game.tableName] = 0;
+    const tableName = game.tableName || "Unknown";
+
+    if (!tableUsage[tableName]) {
+      tableUsage[tableName] = 0;
     }
 
-    tableUsage[game.tableName]++;
+    tableUsage[tableName]++;
   });
 
-  const mostUsedTable =
-    Object.entries(tableUsage).sort(
-      (a, b) => b[1] - a[1]
-    )[0];
+  const mostUsedTable = Object.entries(tableUsage).sort(
+    (a, b) => b[1] - a[1]
+  )[0];
 
+  // Report Card
   const ReportCard = ({
     title,
     value,
     icon,
     color,
-  }) => (
+  }) => {
+    return (
+      <div className="col-lg-4 col-md-6 mb-4">
 
-    <div className="col-lg-4 col-md-6 mb-4">
+        <div className="card border-0 shadow-sm h-100">
 
-      <div className="card border-0 shadow-sm h-100">
+          <div className="card-body">
 
-        <div className="card-body">
+            <div className="d-flex justify-content-between align-items-center">
 
-          <div className="d-flex justify-content-between">
+              <div>
 
-            <div>
+                <p className="text-muted mb-2">
+                  {title}
+                </p>
 
-              <p className="text-muted mb-2">
-                {title}
-              </p>
+                <h2 className={`fw-bold text-${color} mb-0`}>
+                  {value}
+                </h2>
 
-              <h2 className={`fw-bold text-${color}`}>
-                {value}
-              </h2>
+              </div>
 
-            </div>
+              <div className="fs-1">
+                {icon}
+              </div>
 
-            <div className="fs-1">
-              {icon}
             </div>
 
           </div>
@@ -84,38 +92,33 @@ const Reports = ({
         </div>
 
       </div>
-
-    </div>
-
-  );
+    );
+  };
 
   return (
-
     <div className="container mt-4">
 
+      {/* Header */}
       <div className="dashboard-header shadow-sm mb-4">
 
         <h2 className="text-white fw-bold">
-
           <i className="bi bi-bar-chart-fill me-2"></i>
-
           Reports Dashboard
-
         </h2>
 
         <p className="text-light mb-0">
-
           Business overview of your snooker club.
-
         </p>
 
       </div>
 
+
+      {/* Report Cards */}
       <div className="row">
 
         <ReportCard
           title="Revenue Today"
-          value={`₹${revenueToday.toFixed(2)}`}
+          value={`₹${Number(revenueToday || 0).toFixed(2)}`}
           icon="💰"
           color="success"
         />
@@ -165,10 +168,22 @@ const Reports = ({
 
       </div>
 
+{/* Revenue Chart */}
+
+<div className="row mt-2 mb-4">
+
+  <div className="col-12">
+
+    <RevenueChart
+      gameHistory={gameHistory}
+    />
+
+  </div>
+
+</div>
+
     </div>
-
   );
-
 };
 
 export default Reports;
