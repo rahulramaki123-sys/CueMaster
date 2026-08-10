@@ -1,4 +1,5 @@
 import RevenueChart from "../components/RevenueChart";
+import GamesChart from "../components/GamesChart";
 const Reports = ({
   gameHistory,
   revenueToday,
@@ -175,6 +176,19 @@ const Reports = ({
   <div className="col-12">
 
     <RevenueChart
+      gameHistory={gameHistory}
+    />
+
+  </div>
+
+</div>
+{/* Games Chart */}
+
+<div className="row mb-4">
+
+  <div className="col-12">
+
+    <GamesChart
       gameHistory={gameHistory}
     />
 
