@@ -8,28 +8,26 @@ import {
   Tooltip,
 } from "recharts";
 
-const GamesChart = ({ gameHistory }) => {
+const TableUsageChart = ({ gameHistory }) => {
 
-  // Group games by date
-  const gamesByDate = {};
+  // Count completed games for each table
+  const tableUsage = {};
 
   gameHistory.forEach((game) => {
-    const date = new Date(game.endTime).toLocaleDateString();
-
-    if (!gamesByDate[date]) {
-      gamesByDate[date] = 0;
+    if (!tableUsage[game.tableName]) {
+      tableUsage[game.tableName] = 0;
     }
 
-    gamesByDate[date]++;
+    tableUsage[game.tableName]++;
   });
 
-  // Convert grouped data into chart format
-  const gamesData = Object.entries(gamesByDate).map(
-    ([date, games]) => ({
-      date,
+  // Convert object into chart data
+  const tableData = Object.entries(tableUsage)
+    .map(([table, games]) => ({
+      table,
       games,
-    })
-  );
+    }))
+    .sort((a, b) => b.games - a.games);
 
   return (
     <div className="card border-0 shadow-sm h-100">
@@ -40,30 +38,30 @@ const GamesChart = ({ gameHistory }) => {
 
           <div>
             <h5 className="fw-bold mb-1">
-              Games Played
+              Table Usage
             </h5>
 
             <p className="text-muted mb-0">
-              Daily completed games
+              Completed games by table
             </p>
           </div>
 
           <div className="fs-3">
-            🎮
+            🎱
           </div>
 
         </div>
 
-        {gamesData.length === 0 ? (
+        {tableData.length === 0 ? (
 
           <div className="text-center text-muted py-5">
 
             <div className="fs-1 mb-2">
-              🎮
+              🎱
             </div>
 
             <p className="mb-0">
-              No completed games available yet.
+              No table usage data available yet.
             </p>
 
           </div>
@@ -72,11 +70,11 @@ const GamesChart = ({ gameHistory }) => {
 
           <ResponsiveContainer width="100%" height={300}>
 
-            <BarChart data={gamesData}>
+            <BarChart data={tableData}>
 
               <CartesianGrid strokeDasharray="3 3" />
 
-              <XAxis dataKey="date" />
+              <XAxis dataKey="table" />
 
               <YAxis allowDecimals={false} />
 
@@ -89,7 +87,7 @@ const GamesChart = ({ gameHistory }) => {
 
               <Bar
                 dataKey="games"
-                fill="#0d6efd"
+                fill="#6f42c1"
                 radius={[6, 6, 0, 0]}
               />
 
@@ -105,4 +103,4 @@ const GamesChart = ({ gameHistory }) => {
   );
 };
 
-export default GamesChart;
+export default TableUsageChart;
