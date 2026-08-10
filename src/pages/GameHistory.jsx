@@ -1,8 +1,18 @@
 import { useState } from "react";
 
+import ReceiptModal from "../components/ReceiptModal";
+
 const GameHistory = ({ gameHistory }) => {
 
   const [search, setSearch] = useState("");
+
+  const [selectedReceipt, setSelectedReceipt] =
+    useState(null);
+
+
+  // ==========================
+  // Format Time
+  // ==========================
 
   const formatTime = (time) =>
     new Date(time).toLocaleTimeString([], {
@@ -10,12 +20,24 @@ const GameHistory = ({ gameHistory }) => {
       minute: "2-digit",
     });
 
+
+  // ==========================
+  // Format Date
+  // ==========================
+
   const formatDate = (time) =>
     new Date(time).toLocaleDateString();
 
+
+  // ==========================
+  // Format Duration
+  // ==========================
+
   const formatDuration = (seconds) => {
 
-    const hours = Math.floor(seconds / 3600);
+    const hours = Math.floor(
+      seconds / 3600
+    );
 
     const minutes = Math.floor(
       (seconds % 3600) / 60
@@ -24,41 +46,100 @@ const GameHistory = ({ gameHistory }) => {
     const remaining = seconds % 60;
 
     return `${hours}h ${minutes}m ${remaining}s`;
-
   };
 
-  const filteredGames = gameHistory.filter((game) =>
 
-    game.customerName
-      .toLowerCase()
-      .includes(search.toLowerCase()) ||
+  // ==========================
+  // Search
+  // ==========================
 
-    game.phoneNumber.includes(search) ||
+  const filteredGames = gameHistory.filter(
+    (game) =>
 
-    game.tableName
-      .toLowerCase()
-      .includes(search.toLowerCase())
+      game.customerName
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
 
+      game.phoneNumber
+        .includes(search) ||
+
+      game.tableName
+        .toLowerCase()
+        .includes(search.toLowerCase())
   );
+
+
+  // ==========================
+  // Statistics
+  // ==========================
 
   const totalRevenue = gameHistory.reduce(
-
-    (sum, game) => sum + game.charge,
-
+    (sum, game) =>
+      sum + Number(game.charge || 0),
     0
-
   );
+
 
   const averageBill =
     gameHistory.length > 0
       ? totalRevenue / gameHistory.length
       : 0;
 
+
+  // ==========================
+  // View Receipt
+  // ==========================
+
+  const handleViewReceipt = (game) => {
+
+    const receipt = {
+
+      receiptNumber:
+        `CM-${game.id}`,
+
+      tableName:
+        game.tableName,
+
+      tableType:
+        game.tableType,
+
+      customerName:
+        game.customerName,
+
+      phoneNumber:
+        game.phoneNumber,
+
+      startTime:
+        game.startTime,
+
+      endTime:
+        game.endTime,
+
+      duration:
+        formatDuration(
+          game.durationSeconds
+        ),
+
+      rate:
+        game.rate,
+
+      charge:
+        game.charge,
+
+    };
+
+
+    setSelectedReceipt(receipt);
+  };
+
+
   return (
 
     <div className="container mt-4">
 
-      {/* Header */}
+      {/* ==========================
+          Header
+      ========================== */}
 
       <div className="dashboard-header shadow-sm mb-4">
 
@@ -78,7 +159,10 @@ const GameHistory = ({ gameHistory }) => {
 
       </div>
 
-      {/* Search */}
+
+      {/* ==========================
+          Search
+      ========================== */}
 
       <div className="card border-0 shadow-sm mb-4">
 
@@ -107,7 +191,10 @@ const GameHistory = ({ gameHistory }) => {
 
       </div>
 
-      {/* Statistics */}
+
+      {/* ==========================
+          Statistics
+      ========================== */}
 
       <div className="row mb-4">
 
@@ -118,15 +205,11 @@ const GameHistory = ({ gameHistory }) => {
             <div className="card-body">
 
               <p className="text-muted">
-
                 Games Played
-
               </p>
 
               <h2>
-
                 {gameHistory.length}
-
               </h2>
 
             </div>
@@ -135,6 +218,7 @@ const GameHistory = ({ gameHistory }) => {
 
         </div>
 
+
         <div className="col-md-4 mb-3">
 
           <div className="card border-0 shadow-sm">
@@ -142,9 +226,7 @@ const GameHistory = ({ gameHistory }) => {
             <div className="card-body">
 
               <p className="text-muted">
-
                 Total Revenue
-
               </p>
 
               <h2 className="text-success">
@@ -159,6 +241,7 @@ const GameHistory = ({ gameHistory }) => {
 
         </div>
 
+
         <div className="col-md-4 mb-3">
 
           <div className="card border-0 shadow-sm">
@@ -166,9 +249,7 @@ const GameHistory = ({ gameHistory }) => {
             <div className="card-body">
 
               <p className="text-muted">
-
                 Average Bill
-
               </p>
 
               <h2>
@@ -185,6 +266,11 @@ const GameHistory = ({ gameHistory }) => {
 
       </div>
 
+
+      {/* ==========================
+          No Games
+      ========================== */}
+
       {gameHistory.length === 0 ? (
 
         <div className="card border-0 shadow-sm">
@@ -194,9 +280,7 @@ const GameHistory = ({ gameHistory }) => {
             <i className="bi bi-clock-history fs-1 text-success"></i>
 
             <h4 className="mt-3">
-
               No Games Yet
-
             </h4>
 
             <p className="text-muted">
@@ -210,6 +294,10 @@ const GameHistory = ({ gameHistory }) => {
         </div>
 
       ) : (
+
+        /* ==========================
+           Game Table
+        ========================== */
 
         <div className="card border-0 shadow-sm">
 
@@ -233,11 +321,12 @@ const GameHistory = ({ gameHistory }) => {
 
                     <th>Amount</th>
 
-                    <th></th>
+                    <th>Receipt</th>
 
                   </tr>
 
                 </thead>
+
 
                 <tbody>
 
@@ -245,12 +334,12 @@ const GameHistory = ({ gameHistory }) => {
 
                     <tr key={game.id}>
 
+                      {/* Customer */}
+
                       <td>
 
                         <strong>
-
                           {game.customerName}
-
                         </strong>
 
                         <br />
@@ -262,6 +351,9 @@ const GameHistory = ({ gameHistory }) => {
                         </small>
 
                       </td>
+
+
+                      {/* Table */}
 
                       <td>
 
@@ -281,23 +373,35 @@ const GameHistory = ({ gameHistory }) => {
 
                       </td>
 
+
+                      {/* Date */}
+
                       <td>
 
-                        {formatDate(game.endTime)}
+                        {formatDate(
+                          game.endTime
+                        )}
 
                         <br />
 
                         <small className="text-muted">
 
-                          {formatTime(game.startTime)}
+                          {formatTime(
+                            game.startTime
+                          )}
 
                           {" - "}
 
-                          {formatTime(game.endTime)}
+                          {formatTime(
+                            game.endTime
+                          )}
 
                         </small>
 
                       </td>
+
+
+                      {/* Duration */}
 
                       <td>
 
@@ -307,19 +411,33 @@ const GameHistory = ({ gameHistory }) => {
 
                       </td>
 
+
+                      {/* Amount */}
+
                       <td>
 
                         <strong className="text-success">
 
-                          ₹{game.charge.toFixed(2)}
+                          ₹{Number(
+                            game.charge || 0
+                          ).toFixed(2)}
 
                         </strong>
 
                       </td>
 
+
+                      {/* Receipt */}
+
                       <td>
 
-                        <button className="btn btn-outline-success btn-sm">
+                        <button
+                          className="btn btn-outline-success btn-sm"
+                          title="View Receipt"
+                          onClick={() =>
+                            handleViewReceipt(game)
+                          }
+                        >
 
                           <i className="bi bi-receipt"></i>
 
@@ -343,10 +461,21 @@ const GameHistory = ({ gameHistory }) => {
 
       )}
 
+
+      {/* ==========================
+          Receipt Modal
+      ========================== */}
+
+      <ReceiptModal
+        receipt={selectedReceipt}
+        onClose={() =>
+          setSelectedReceipt(null)
+        }
+      />
+
     </div>
-
   );
-
 };
+
 
 export default GameHistory;

@@ -6,6 +6,7 @@ import TableCard from "../components/TableCard";
 import StartGameModal from "../components/StartGameModal";
 import CheckoutModal from "../components/CheckoutModal";
 
+
 const Dashboard = ({
   tables,
   setTables,
@@ -25,6 +26,7 @@ const Dashboard = ({
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const [endTime, setEndTime] = useState(null);
+  
 
   const runningTables = tables.filter(
     (table) => table.status === "Running"
@@ -179,7 +181,7 @@ const formatDuration = (seconds) => {
   );
 
   const remainingSeconds =
-    seconds % 60;
+    seconds %   60;
 
   return `${hours}h ${minutes}m ${remainingSeconds}s`;
 
@@ -200,6 +202,7 @@ const handleCompleteGame = () => {
 
   if (!checkoutTable) return;
 
+  // Create completed game record
   const completedGame = {
 
     id: Date.now(),
@@ -224,11 +227,15 @@ const handleCompleteGame = () => {
 
   };
 
+
+  // Save game to history
   setGameHistory((previous) => [
     completedGame,
     ...previous,
   ]);
 
+
+  // Update dashboard statistics
   setRevenueToday((previous) =>
     previous + tableCharge
   );
@@ -237,6 +244,8 @@ const handleCompleteGame = () => {
     previous + 1
   );
 
+
+  // Make table available again
   const updatedTables = tables.map((table) => {
 
     if (table.id === checkoutTable.id) {
@@ -261,23 +270,26 @@ const handleCompleteGame = () => {
 
   });
 
+
   setTables(updatedTables);
 
+
+  // Close checkout modal
   setCheckoutTable(null);
 
   setEndTime(null);
 
 };
-
 // ==========================
 // UI
 // ==========================
 
 return (
 
-  <div className="container mt-4">
+  <>
 
     <DashboardHeader />
+
 
     <DashboardStats
       revenueToday={revenueToday}
@@ -285,6 +297,7 @@ return (
       availableTables={availableTables}
       gamesToday={gamesToday}
     />
+
 
     <div className="d-flex justify-content-between align-items-center mb-3">
 
@@ -296,6 +309,7 @@ return (
 
       </h3>
 
+
       <span className="badge bg-success">
 
         {runningTables} Running
@@ -303,6 +317,7 @@ return (
       </span>
 
     </div>
+
 
     <div className="row">
 
@@ -325,29 +340,45 @@ return (
 
     </div>
 
-   <StartGameModal
-  selectedTable={selectedTable}
-  customerName={customerName}
-  setCustomerName={setCustomerName}
-  phoneNumber={phoneNumber}
-  setPhoneNumber={setPhoneNumber}
-  onCancel={handleCancel}
-  onConfirm={handleConfirmStart}
-/>
-<CheckoutModal
-  checkoutTable={checkoutTable}
-  endTime={endTime}
-  durationSeconds={durationSeconds}
-  tableCharge={tableCharge}
-  formatDuration={formatDuration}
-  onCancel={handleCancelCheckout}
-  onComplete={handleCompleteGame}
-/>
 
-  </div>
+    {/* ==========================
+        Start Game Modal
+    ========================== */}
+
+    {selectedTable && (
+
+      <StartGameModal
+        selectedTable={selectedTable}
+        customerName={customerName}
+        phoneNumber={phoneNumber}
+        setCustomerName={setCustomerName}
+        setPhoneNumber={setPhoneNumber}
+        onCancel={handleCancel}
+        onConfirm={handleConfirmStart}
+      />
+
+    )}
+
+
+    {/* ==========================
+        Checkout Modal
+    ========================== */}
+
+    <CheckoutModal
+      checkoutTable={checkoutTable}
+      endTime={endTime}
+      durationSeconds={durationSeconds}
+      tableCharge={tableCharge}
+      formatDuration={formatDuration}
+      onCancel={handleCancelCheckout}
+      onComplete={handleCompleteGame}
+    />
+
+
+  </>
 
 );
-
 };
 
 export default Dashboard;
+
