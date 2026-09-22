@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import DashboardHeader from "../components/DashboardHeader";
 import DashboardStats from "../components/DashboardStats";
+import RunningTables from "../components/RunningTables";
 import TableCard from "../components/TableCard";
 import StartGameModal from "../components/StartGameModal";
 import CheckoutModal from "../components/CheckoutModal";
@@ -297,6 +298,7 @@ return (
       availableTables={availableTables}
       gamesToday={gamesToday}
     />
+    <RunningTables tables={tables} />
 
 
     <div className="d-flex justify-content-between align-items-center mb-3">

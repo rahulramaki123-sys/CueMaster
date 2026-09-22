@@ -4,6 +4,7 @@ const Customers = ({ gameHistory }) => {
 
   const [search, setSearch] = useState("");
 
+
   // ==========================
   // Create Customer Records
   // ==========================
@@ -14,11 +15,16 @@ const Customers = ({ gameHistory }) => {
 
       const phone = game.phoneNumber;
 
+      if (!phone) {
+        return customerList;
+      }
+
       if (customerList[phone]) {
 
         customerList[phone].games += 1;
 
-        customerList[phone].totalSpent += game.charge;
+        customerList[phone].totalSpent +=
+          Number(game.charge || 0);
 
         if (
           new Date(game.endTime) >
@@ -34,13 +40,14 @@ const Customers = ({ gameHistory }) => {
 
         customerList[phone] = {
 
-          name: game.customerName,
+          name: game.customerName || "Unknown",
 
           phone: game.phoneNumber,
 
           games: 1,
 
-          totalSpent: game.charge,
+          totalSpent:
+            Number(game.charge || 0),
 
           lastPlayed: game.endTime,
 
@@ -54,6 +61,7 @@ const Customers = ({ gameHistory }) => {
 
   );
 
+
   // ==========================
   // Sort Latest First
   // ==========================
@@ -63,60 +71,82 @@ const Customers = ({ gameHistory }) => {
     (a, b) =>
 
       new Date(b.lastPlayed) -
-
       new Date(a.lastPlayed)
 
   );
+
 
   // ==========================
   // Search
   // ==========================
 
-  const filteredCustomers = customers.filter(
+  const searchText = search
+    .trim()
+    .toLowerCase();
 
-    (customer) =>
+  const filteredCustomers =
+    customers.filter((customer) => {
 
-      customer.name
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
+      const customerName =
+        customer.name?.toLowerCase() || "";
 
-      customer.phone.includes(search)
+      const customerPhone =
+        customer.phone?.toString() || "";
 
-  );
+      return (
+        customerName.includes(searchText) ||
+        customerPhone.includes(searchText)
+      );
+
+    });
+
 
   // ==========================
   // Statistics
   // ==========================
 
-  const totalRevenue = customers.reduce(
+  const totalRevenue =
+    customers.reduce(
 
-    (sum, customer) =>
+      (sum, customer) =>
+        sum + customer.totalSpent,
 
-      sum + customer.totalSpent,
+      0
 
-    0
+    );
 
-  );
 
-  const totalGames = customers.reduce(
+  const totalGames =
+    customers.reduce(
 
-    (sum, customer) =>
+      (sum, customer) =>
+        sum + customer.games,
 
-      sum + customer.games,
+      0
 
-    0
+    );
 
-  );
 
-  const formatDate = (date) =>
+  // ==========================
+  // Format Date
+  // ==========================
 
-    new Date(date).toLocaleDateString();
+  const formatDate = (date) => {
+
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString();
+
+  };
+
 
   return (
 
     <div className="container mt-4">
 
-      {/* Header */}
+      {/* ==========================
+          Header
+      ========================== */}
 
       <div className="dashboard-header shadow-sm mb-4">
 
@@ -136,7 +166,10 @@ const Customers = ({ gameHistory }) => {
 
       </div>
 
-      {/* Search */}
+
+      {/* ==========================
+          Search
+      ========================== */}
 
       <div className="card border-0 shadow-sm mb-4">
 
@@ -151,6 +184,8 @@ const Customers = ({ gameHistory }) => {
             </span>
 
             <input
+
+              type="text"
 
               className="form-control"
 
@@ -170,7 +205,10 @@ const Customers = ({ gameHistory }) => {
 
       </div>
 
-      {/* Empty State */}
+
+      {/* ==========================
+          No Customers
+      ========================== */}
 
       {customers.length === 0 ? (
 
@@ -186,9 +224,10 @@ const Customers = ({ gameHistory }) => {
 
             </h4>
 
-            <p className="text-muted">
+            <p className="text-muted mb-0">
 
-              Customers will appear after completing games.
+              Customers will appear after
+              completing games.
 
             </p>
 
@@ -200,7 +239,9 @@ const Customers = ({ gameHistory }) => {
 
         <>
 
-          {/* Statistics */}
+          {/* ==========================
+              Statistics
+          ========================== */}
 
           <div className="row mb-4">
 
@@ -228,6 +269,7 @@ const Customers = ({ gameHistory }) => {
 
             </div>
 
+
             <div className="col-md-4 mb-3">
 
               <div className="card border-0 shadow-sm">
@@ -251,6 +293,7 @@ const Customers = ({ gameHistory }) => {
               </div>
 
             </div>
+
 
             <div className="col-md-4 mb-3">
 
@@ -278,125 +321,184 @@ const Customers = ({ gameHistory }) => {
 
           </div>
 
-          {/* Customer Table */}
 
-          <div className="card border-0 shadow-sm">
+          {/* ==========================
+              No Search Results
+          ========================== */}
 
-            <div className="card-body">
+          {filteredCustomers.length === 0 ? (
 
-              <div className="table-responsive">
+            <div className="card border-0 shadow-sm">
 
-                <table className="table align-middle">
+              <div className="card-body text-center py-5">
 
-                  <thead>
+                <i className="bi bi-search fs-1 text-muted"></i>
 
-                    <tr>
+                <h4 className="mt-3">
 
-                      <th>Customer</th>
+                  No Matching Customers
 
-                      <th>Phone</th>
+                </h4>
 
-                      <th>Games</th>
+                <p className="text-muted mb-0">
 
-                      <th>Total Spent</th>
+                  No customers match your search.
+                  Try a different name or phone number.
 
-                      <th>Last Played</th>
-
-                    </tr>
-
-                  </thead>
-
-                  <tbody>
-
-                    {filteredCustomers.map(
-
-                      (customer) => (
-
-                        <tr key={customer.phone}>
-
-                          <td>
-
-                            <div className="d-flex align-items-center">
-
-                              <div
-
-                                className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3"
-
-                                style={{
-
-                                  width: "42px",
-
-                                  height: "42px",
-
-                                }}
-
-                              >
-
-                                {customer.name
-                                  .charAt(0)
-                                  .toUpperCase()}
-
-                              </div>
-
-                              <strong>
-
-                                {customer.name}
-
-                              </strong>
-
-                            </div>
-
-                          </td>
-
-                          <td>
-
-                            {customer.phone}
-
-                          </td>
-
-                          <td>
-
-                            <span className="badge bg-success">
-
-                              {customer.games}
-
-                            </span>
-
-                          </td>
-
-                          <td>
-
-                            <strong>
-
-                              ₹{customer.totalSpent.toFixed(2)}
-
-                            </strong>
-
-                          </td>
-
-                          <td>
-
-                            {formatDate(
-                              customer.lastPlayed
-                            )}
-
-                          </td>
-
-                        </tr>
-
-                      )
-
-                    )}
-
-                  </tbody>
-
-                </table>
+                </p>
 
               </div>
 
             </div>
 
-          </div>
+          ) : (
+
+            /* ==========================
+               Customer Table
+            ========================== */
+
+            <div className="card border-0 shadow-sm">
+
+              <div className="card-body">
+
+                <div className="table-responsive">
+
+                  <table className="table align-middle">
+
+                    <thead>
+
+                      <tr>
+
+                        <th>
+                          Customer
+                        </th>
+
+                        <th>
+                          Phone
+                        </th>
+
+                        <th>
+                          Games
+                        </th>
+
+                        <th>
+                          Total Spent
+                        </th>
+
+                        <th>
+                          Last Played
+                        </th>
+
+                      </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                      {filteredCustomers.map(
+                        (customer) => (
+
+                          <tr
+                            key={customer.phone}
+                          >
+
+                            {/* Customer */}
+
+                            <td>
+
+                              <div className="d-flex align-items-center">
+
+                                <div
+
+                                  className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3"
+
+                                  style={{
+                                    width: "42px",
+                                    height: "42px",
+                                  }}
+
+                                >
+
+                                  {customer.name
+                                    .charAt(0)
+                                    .toUpperCase()}
+
+                                </div>
+
+                                <strong>
+
+                                  {customer.name}
+
+                                </strong>
+
+                              </div>
+
+                            </td>
+
+
+                            {/* Phone */}
+
+                            <td>
+
+                              {customer.phone}
+
+                            </td>
+
+
+                            {/* Games */}
+
+                            <td>
+
+                              <span className="badge bg-success">
+
+                                {customer.games}
+
+                              </span>
+
+                            </td>
+
+
+                            {/* Total Spent */}
+
+                            <td>
+
+                              <strong>
+
+                                ₹
+                                {customer.totalSpent.toFixed(2)}
+
+                              </strong>
+
+                            </td>
+
+
+                            {/* Last Played */}
+
+                            <td>
+
+                              {formatDate(
+                                customer.lastPlayed
+                              )}
+
+                            </td>
+
+                          </tr>
+
+                        )
+                      )}
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          )}
 
         </>
 

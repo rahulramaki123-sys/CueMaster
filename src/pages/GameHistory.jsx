@@ -53,19 +53,28 @@ const GameHistory = ({ gameHistory }) => {
   // Search
   // ==========================
 
+  const searchText = search
+    .trim()
+    .toLowerCase();
+
   const filteredGames = gameHistory.filter(
-    (game) =>
+    (game) => {
 
-      game.customerName
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
+      const customerName =
+        game.customerName?.toLowerCase() || "";
 
-      game.phoneNumber
-        .includes(search) ||
+      const phoneNumber =
+        game.phoneNumber?.toString() || "";
 
-      game.tableName
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      const tableName =
+        game.tableName?.toLowerCase() || "";
+
+      return (
+        customerName.includes(searchText) ||
+        phoneNumber.includes(searchText) ||
+        tableName.includes(searchText)
+      );
+    }
   );
 
 
@@ -128,7 +137,6 @@ const GameHistory = ({ gameHistory }) => {
 
     };
 
-
     setSelectedReceipt(receipt);
   };
 
@@ -177,6 +185,7 @@ const GameHistory = ({ gameHistory }) => {
             </span>
 
             <input
+              type="text"
               className="form-control"
               placeholder="Search customer, phone or table..."
               value={search}
@@ -283,9 +292,36 @@ const GameHistory = ({ gameHistory }) => {
               No Games Yet
             </h4>
 
-            <p className="text-muted">
+            <p className="text-muted mb-0">
 
               Completed games will appear here.
+
+            </p>
+
+          </div>
+
+        </div>
+
+      ) : filteredGames.length === 0 ? (
+
+        /* ==========================
+           No Search Results
+        ========================== */
+
+        <div className="card border-0 shadow-sm">
+
+          <div className="card-body text-center py-5">
+
+            <i className="bi bi-search fs-1 text-muted"></i>
+
+            <h4 className="mt-3">
+              No Matching Games
+            </h4>
+
+            <p className="text-muted mb-0">
+
+              No games match your search.
+              Try a different customer, phone number or table.
 
             </p>
 
@@ -311,17 +347,29 @@ const GameHistory = ({ gameHistory }) => {
 
                   <tr>
 
-                    <th>Customer</th>
+                    <th>
+                      Customer
+                    </th>
 
-                    <th>Table</th>
+                    <th>
+                      Table
+                    </th>
 
-                    <th>Date</th>
+                    <th>
+                      Date
+                    </th>
 
-                    <th>Duration</th>
+                    <th>
+                      Duration
+                    </th>
 
-                    <th>Amount</th>
+                    <th>
+                      Amount
+                    </th>
 
-                    <th>Receipt</th>
+                    <th>
+                      Receipt
+                    </th>
 
                   </tr>
 

@@ -4,19 +4,17 @@ import RevenueChart from "../components/RevenueChart";
 import GamesChart from "../components/GamesChart";
 import TableUsageChart from "../components/TableUsageChart";
 
-const Reports = ({
-  gameHistory,
-}) => {
+const Reports = ({ gameHistory }) => {
 
   // ==========================
-  // Report period
+  // Report Period
   // ==========================
 
   const [period, setPeriod] = useState("today");
 
 
   // ==========================
-  // Filter games by period
+  // Filter Games By Period
   // ==========================
 
   const getFilteredHistory = () => {
@@ -29,6 +27,7 @@ const Reports = ({
 
     const startDate = new Date(now);
 
+
     if (period === "today") {
 
       startDate.setHours(0, 0, 0, 0);
@@ -37,7 +36,8 @@ const Reports = ({
 
       const day = startDate.getDay();
 
-      const difference = day === 0 ? 6 : day - 1;
+      const difference =
+        day === 0 ? 6 : day - 1;
 
       startDate.setDate(
         startDate.getDate() - difference
@@ -50,29 +50,40 @@ const Reports = ({
       startDate.setDate(1);
 
       startDate.setHours(0, 0, 0, 0);
+
     }
+
 
     return gameHistory.filter((game) => {
 
-      const gameDate = new Date(game.endTime);
+      const gameDate =
+        new Date(game.endTime);
 
       return gameDate >= startDate;
+
     });
+
   };
 
 
-  const filteredHistory = getFilteredHistory();
+  const filteredHistory =
+    getFilteredHistory();
 
 
   // ==========================
-  // Period label
+  // Period Labels
   // ==========================
 
   const periodLabels = {
+
     today: "Today",
+
     week: "This Week",
+
     month: "This Month",
+
     all: "All Time",
+
   };
 
 
@@ -80,29 +91,45 @@ const Reports = ({
   // Revenue
   // ==========================
 
-  const filteredRevenue = filteredHistory.reduce(
-    (sum, game) =>
-      sum + Number(game.charge || 0),
-    0
-  );
+  const filteredRevenue =
+    filteredHistory.reduce(
+
+      (sum, game) =>
+        sum + Number(game.charge || 0),
+
+      0
+
+    );
 
 
   // ==========================
   // Games
   // ==========================
 
-  const filteredGames = filteredHistory.length;
+  const filteredGames =
+    filteredHistory.length;
 
 
   // ==========================
   // Customers
   // ==========================
 
-  const totalCustomers = new Set(
-    filteredHistory.map(
-      (game) => game.phoneNumber
-    )
-  ).size;
+  const customerPhones =
+    new Set();
+
+  filteredHistory.forEach((game) => {
+
+    const phone =
+      game.phoneNumber?.toString().trim();
+
+    if (phone) {
+      customerPhones.add(phone);
+    }
+
+  });
+
+  const totalCustomers =
+    customerPhones.size;
 
 
   // ==========================
@@ -111,7 +138,8 @@ const Reports = ({
 
   const averageBill =
     filteredHistory.length > 0
-      ? filteredRevenue / filteredHistory.length
+      ? filteredRevenue /
+        filteredHistory.length
       : 0;
 
 
@@ -123,22 +151,39 @@ const Reports = ({
 
   filteredHistory.forEach((game) => {
 
+    const phone =
+      game.phoneNumber?.toString().trim();
+
+    if (!phone) return;
+
     const name =
       game.customerName || "Unknown";
 
-    if (!customerTotals[name]) {
-      customerTotals[name] = 0;
+    if (!customerTotals[phone]) {
+
+      customerTotals[phone] = {
+
+        name,
+
+        totalSpent: 0,
+
+      };
+
     }
 
-    customerTotals[name] += Number(
-      game.charge || 0
-    );
+    customerTotals[phone].totalSpent +=
+      Number(game.charge || 0);
+
   });
 
 
   const topCustomer =
-    Object.entries(customerTotals).sort(
-      (a, b) => b[1] - a[1]
+    Object.values(customerTotals).sort(
+
+      (a, b) =>
+        b.totalSpent -
+        a.totalSpent
+
     )[0];
 
 
@@ -154,16 +199,21 @@ const Reports = ({
       game.tableName || "Unknown";
 
     if (!tableUsage[tableName]) {
+
       tableUsage[tableName] = 0;
+
     }
 
     tableUsage[tableName]++;
+
   });
 
 
   const mostUsedTable =
     Object.entries(tableUsage).sort(
+
       (a, b) => b[1] - a[1]
+
     )[0];
 
 
@@ -179,6 +229,7 @@ const Reports = ({
   }) => {
 
     return (
+
       <div className="col-lg-4 col-md-6 mb-4">
 
         <div className="card border-0 shadow-sm h-100">
@@ -212,7 +263,9 @@ const Reports = ({
         </div>
 
       </div>
+
     );
+
   };
 
 
@@ -323,7 +376,7 @@ const Reports = ({
           title="Top Customer"
           value={
             topCustomer
-              ? topCustomer[0]
+              ? topCustomer.name
               : "N/A"
           }
           icon="🏆"
@@ -395,8 +448,9 @@ const Reports = ({
       </div>
 
     </div>
-  );
-};
 
+  );
+
+};
 
 export default Reports;

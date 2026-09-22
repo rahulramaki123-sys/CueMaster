@@ -2,20 +2,54 @@ import { useState } from "react";
 
 const Tables = ({ tables, setTables }) => {
 
+  // ==========================
   // Modal
+  // ==========================
+
   const [showModal, setShowModal] = useState(false);
 
+  // ==========================
   // Form Fields
+  // ==========================
+
   const [tableName, setTableName] = useState("");
   const [tableType, setTableType] = useState("");
   const [tableRate, setTableRate] = useState("");
 
+  // ==========================
   // Edit Mode
+  // ==========================
+
   const [editMode, setEditMode] = useState(false);
   const [editingTableId, setEditingTableId] = useState(null);
 
-  // Open Edit Modal
+  // ==========================
+  // Add Table
+  // ==========================
+
+  const handleAddClick = () => {
+
+    setEditMode(false);
+    setEditingTableId(null);
+
+    setTableName("");
+    setTableType("");
+    setTableRate("");
+
+    setShowModal(true);
+  };
+
+  // ==========================
+  // Edit Table
+  // ==========================
+
   const handleEditClick = (table) => {
+
+    // Don't allow editing a running table
+    if (table.status === "Running") {
+      alert("Cannot edit a running table.");
+      return;
+    }
 
     setEditMode(true);
 
@@ -26,24 +60,33 @@ const Tables = ({ tables, setTables }) => {
     setTableRate(table.rate);
 
     setShowModal(true);
-
   };
 
+  // ==========================
   // Add OR Update Table
+  // ==========================
+
   const handleAddTable = (e) => {
 
     e.preventDefault();
 
+    // Validate form
     if (
       !tableName.trim() ||
       !tableType.trim() ||
-      !tableRate
+      !tableRate ||
+      Number(tableRate) <= 0
     ) {
-      alert("Please fill all fields.");
+      alert(
+        "Please enter a valid table name, type and hourly rate."
+      );
       return;
     }
 
-    // UPDATE
+    // ==========================
+    // UPDATE TABLE
+    // ==========================
+
     if (editMode) {
 
       const updatedTables = tables.map((table) => {
@@ -52,32 +95,32 @@ const Tables = ({ tables, setTables }) => {
 
           return {
             ...table,
-            name: tableName,
+            name: tableName.trim(),
             type: tableType,
             rate: Number(tableRate),
           };
-
         }
 
         return table;
-
       });
 
       setTables(updatedTables);
 
       setEditMode(false);
       setEditingTableId(null);
-
     }
 
-    // ADD
+    // ==========================
+    // ADD TABLE
+    // ==========================
+
     else {
 
       const newTable = {
 
         id: Date.now(),
 
-        name: tableName,
+        name: tableName.trim(),
 
         type: tableType,
 
@@ -88,68 +131,89 @@ const Tables = ({ tables, setTables }) => {
       };
 
       setTables([...tables, newTable]);
-
     }
 
+    // ==========================
     // Reset Form
+    // ==========================
 
     setTableName("");
     setTableType("");
     setTableRate("");
 
     setShowModal(false);
-
   };
 
+  // ==========================
   // Close Modal
+  // ==========================
 
   const handleCloseModal = () => {
 
     setShowModal(false);
 
     setEditMode(false);
-
     setEditingTableId(null);
 
     setTableName("");
     setTableType("");
     setTableRate("");
-
   };
+
+  // ==========================
   // Delete Table
-const handleDeleteTable = (id) => {
+  // ==========================
 
-  const table = tables.find((table) => table.id === id);
+  const handleDeleteTable = (id) => {
 
-  // Don't delete a running table
-  if (table.status === "Running") {
-    alert("Cannot delete a running table.");
-    return;
-  }
+    const table = tables.find(
+      (table) => table.id === id
+    );
 
-  // Ask for confirmation
-  const confirmDelete = window.confirm(
-    `Delete ${table.name}?`
-  );
+    if (!table) return;
 
-  if (!confirmDelete) {
-    return;
-  }
+    // Don't delete a running table
+    if (table.status === "Running") {
 
-  const updatedTables = tables.filter(
-    (table) => table.id !== id
-  );
+      alert(
+        "Cannot delete a running table."
+      );
 
-  setTables(updatedTables);
+      return;
+    }
 
-};
-    return (
+    // Ask for confirmation
+    const confirmDelete = window.confirm(
+      `Delete ${table.name}?`
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    const updatedTables = tables.filter(
+      (table) => table.id !== id
+    );
+
+    setTables(updatedTables);
+  };
+
+  // ==========================
+  // UI
+  // ==========================
+
+  return (
+
     <div className="container mt-4">
 
-      {/* Header */}
+      {/* ==========================
+          Header
+      ========================== */}
+
       <div className="d-flex justify-content-between align-items-center mb-4">
 
         <div>
+
           <h2 className="fw-bold">
             Tables Management
           </h2>
@@ -157,18 +221,22 @@ const handleDeleteTable = (id) => {
           <p className="text-muted">
             Manage snooker tables.
           </p>
+
         </div>
 
         <button
           className="btn btn-success"
-          onClick={() => setShowModal(true)}
+          onClick={handleAddClick}
         >
           + Add Table
         </button>
 
       </div>
 
-      {/* Tables */}
+
+      {/* ==========================
+          Tables
+      ========================== */}
 
       <div className="row">
 
@@ -188,45 +256,62 @@ const handleDeleteTable = (id) => {
                 </h4>
 
                 <p>
-                  <strong>Type:</strong> {table.type}
+                  <strong>Type:</strong>{" "}
+                  {table.type}
                 </p>
 
                 <p>
-                  <strong>Rate:</strong> ₹{table.rate}/hour
+                  <strong>Rate:</strong>{" "}
+                  ₹{table.rate}/hour
                 </p>
 
                 <p>
+
                   <strong>Status:</strong>{" "}
 
                   {table.status === "Running" ? (
+
                     <span className="badge bg-danger">
                       Running
                     </span>
+
                   ) : (
+
                     <span className="badge bg-success">
                       Available
                     </span>
+
                   )}
 
                 </p>
 
+
+                {/* ==========================
+                    Actions
+                ========================== */}
+
                 <div className="d-flex gap-2 mt-3">
 
-  <button
-    className="btn btn-warning btn-sm w-50"
-    onClick={() => handleEditClick(table)}
-  >
-    ✏ Edit
-  </button>
+                  <button
+                    className="btn btn-warning btn-sm w-50"
+                    onClick={() =>
+                      handleEditClick(table)
+                    }
+                  >
+                    ✏ Edit
+                  </button>
 
-  <button
-    className="btn btn-danger btn-sm w-50"
-    onClick={() => handleDeleteTable(table.id)}
-  >
-    🗑 Delete
-  </button>
 
-</div>
+                  <button
+                    className="btn btn-danger btn-sm w-50"
+                    onClick={() =>
+                      handleDeleteTable(table.id)
+                    }
+                  >
+                    🗑 Delete
+                  </button>
+
+                </div>
 
               </div>
 
@@ -238,7 +323,10 @@ const handleDeleteTable = (id) => {
 
       </div>
 
-      {/* Modal */}
+
+      {/* ==========================
+          Add / Edit Modal
+      ========================== */}
 
       {showModal && (
 
@@ -246,7 +334,8 @@ const handleDeleteTable = (id) => {
           className="modal show d-block"
           tabIndex="-1"
           style={{
-            backgroundColor: "rgba(0,0,0,0.5)"
+            backgroundColor:
+              "rgba(0,0,0,0.5)",
           }}
         >
 
@@ -256,12 +345,16 @@ const handleDeleteTable = (id) => {
 
               <form onSubmit={handleAddTable}>
 
+                {/* Modal Header */}
+
                 <div className="modal-header">
 
-                  <h5>
+                  <h5 className="modal-title">
+
                     {editMode
                       ? "Edit Table"
                       : "Add New Table"}
+
                   </h5>
 
                   <button
@@ -272,7 +365,12 @@ const handleDeleteTable = (id) => {
 
                 </div>
 
+
+                {/* Modal Body */}
+
                 <div className="modal-body">
+
+                  {/* Table Name */}
 
                   <div className="mb-3">
 
@@ -281,14 +379,21 @@ const handleDeleteTable = (id) => {
                     </label>
 
                     <input
+                      type="text"
                       className="form-control"
                       value={tableName}
                       onChange={(e) =>
-                        setTableName(e.target.value)
+                        setTableName(
+                          e.target.value
+                        )
                       }
+                      placeholder="Example: T5"
                     />
 
                   </div>
+
+
+                  {/* Table Type */}
 
                   <div className="mb-3">
 
@@ -300,29 +405,34 @@ const handleDeleteTable = (id) => {
                       className="form-select"
                       value={tableType}
                       onChange={(e) =>
-                        setTableType(e.target.value)
+                        setTableType(
+                          e.target.value
+                        )
                       }
                     >
 
                       <option value="">
-                        Select
+                        Select Table Type
                       </option>
 
-                      <option>
+                      <option value="French">
                         French
                       </option>
 
-                      <option>
+                      <option value="English">
                         English
                       </option>
 
-                      <option>
+                      <option value="Small">
                         Small
                       </option>
 
                     </select>
 
                   </div>
+
+
+                  {/* Hourly Rate */}
 
                   <div className="mb-3">
 
@@ -332,16 +442,24 @@ const handleDeleteTable = (id) => {
 
                     <input
                       type="number"
+                      min="1"
+                      step="1"
                       className="form-control"
                       value={tableRate}
                       onChange={(e) =>
-                        setTableRate(e.target.value)
+                        setTableRate(
+                          e.target.value
+                        )
                       }
+                      placeholder="Example: 180"
                     />
 
                   </div>
 
                 </div>
+
+
+                {/* Modal Footer */}
 
                 <div className="modal-footer">
 
@@ -357,9 +475,11 @@ const handleDeleteTable = (id) => {
                     type="submit"
                     className="btn btn-success"
                   >
+
                     {editMode
                       ? "Update Table"
                       : "Save Table"}
+
                   </button>
 
                 </div>
