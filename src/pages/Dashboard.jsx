@@ -7,7 +7,6 @@ import TableCard from "../components/TableCard";
 import StartGameModal from "../components/StartGameModal";
 import CheckoutModal from "../components/CheckoutModal";
 
-
 const Dashboard = ({
   tables,
   setTables,
@@ -17,7 +16,6 @@ const Dashboard = ({
   setGamesToday,
   setGameHistory,
 }) => {
-
   const [selectedTable, setSelectedTable] = useState(null);
 
   const [checkoutTable, setCheckoutTable] = useState(null);
@@ -27,7 +25,6 @@ const Dashboard = ({
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const [endTime, setEndTime] = useState(null);
-  
 
   const runningTables = tables.filter(
     (table) => table.status === "Running"
@@ -36,351 +33,289 @@ const Dashboard = ({
   const availableTables = tables.filter(
     (table) => table.status === "Available"
   ).length;
+
   // ==========================
-// Start Game
-// ==========================
+  // Start Game
+  // ==========================
 
-const handleStartGame = (id) => {
-
-  const table = tables.find(
-    (table) => table.id === id
-  );
-
-  setSelectedTable(table);
-
-};
-
-// ==========================
-// Confirm Start Game
-// ==========================
-
-const handleConfirmStart = (e) => {
-
-  e.preventDefault();
-
-  if (
-    !customerName.trim() ||
-    !phoneNumber.trim()
-  ) {
-
-    alert(
-      "Please enter customer name and phone number."
+  const handleStartGame = (id) => {
+    const table = tables.find(
+      (table) => table.id === id
     );
 
-    return;
-
-  }
-
-  const updatedTables = tables.map((table) => {
-
-    if (table.id === selectedTable.id) {
-
-      return {
-
-        ...table,
-
-        status: "Running",
-
-        customerName,
-
-        phoneNumber,
-
-        startTime: new Date(),
-
-      };
-
-    }
-
-    return table;
-
-  });
-
-  setTables(updatedTables);
-
-  setSelectedTable(null);
-
-  setCustomerName("");
-
-  setPhoneNumber("");
-
-};
-
-// ==========================
-// Cancel Start
-// ==========================
-
-const handleCancel = () => {
-
-  setSelectedTable(null);
-
-  setCustomerName("");
-
-  setPhoneNumber("");
-
-};
-
-// ==========================
-// Stop Game
-// ==========================
-
-const handleStopGame = (id) => {
-
-  const table = tables.find(
-    (table) => table.id === id
-  );
-
-  if (!table) return;
-
-  setCheckoutTable(table);
-
-  setEndTime(new Date());
-
-};
-
-// ==========================
-// Cancel Checkout
-// ==========================
-
-const handleCancelCheckout = () => {
-
-  setCheckoutTable(null);
-
-  setEndTime(null);
-
-};
-
-// ==========================
-// Duration
-// ==========================
-
-const getDurationSeconds = () => {
-
-  if (
-    !checkoutTable?.startTime ||
-    !endTime
-  ) {
-
-    return 0;
-
-  }
-
-  return Math.floor(
-    (
-      endTime -
-      new Date(checkoutTable.startTime)
-    ) / 1000
-  );
-
-};
-
-const formatDuration = (seconds) => {
-
-  const hours = Math.floor(seconds / 3600);
-
-  const minutes = Math.floor(
-    (seconds % 3600) / 60
-  );
-
-  const remainingSeconds =
-    seconds %   60;
-
-  return `${hours}h ${minutes}m ${remainingSeconds}s`;
-
-};
-
-const durationSeconds =
-  getDurationSeconds();
-
-const tableCharge = checkoutTable
-  ? (durationSeconds / 3600) *
-    checkoutTable.rate
-  : 0;
-  // ==========================
-// Complete Game
-// ==========================
-
-const handleCompleteGame = () => {
-
-  if (!checkoutTable) return;
-
-  // Create completed game record
-  const completedGame = {
-
-    id: Date.now(),
-
-    tableName: checkoutTable.name,
-
-    tableType: checkoutTable.type,
-
-    customerName: checkoutTable.customerName,
-
-    phoneNumber: checkoutTable.phoneNumber,
-
-    startTime: checkoutTable.startTime,
-
-    endTime,
-
-    durationSeconds,
-
-    rate: checkoutTable.rate,
-
-    charge: tableCharge,
-
+    setSelectedTable(table);
   };
 
+  // ==========================
+  // Confirm Start Game
+  // ==========================
 
-  // Save game to history
-  setGameHistory((previous) => [
-    completedGame,
-    ...previous,
-  ]);
+  const handleConfirmStart = (e) => {
+    e.preventDefault();
 
+    if (
+      !customerName.trim() ||
+      !phoneNumber.trim()
+    ) {
+      alert(
+        "Please enter customer name and phone number."
+      );
 
-  // Update dashboard statistics
-  setRevenueToday((previous) =>
-    previous + tableCharge
-  );
-
-  setGamesToday((previous) =>
-    previous + 1
-  );
-
-
-  // Make table available again
-  const updatedTables = tables.map((table) => {
-
-    if (table.id === checkoutTable.id) {
-
-      return {
-
-        ...table,
-
-        status: "Available",
-
-        customerName: "",
-
-        phoneNumber: "",
-
-        startTime: null,
-
-      };
-
+      return;
     }
 
-    return table;
+    const updatedTables = tables.map((table) => {
+      if (table.id === selectedTable.id) {
+        return {
+          ...table,
+          status: "Running",
+          customerName,
+          phoneNumber,
+          startTime: new Date(),
+        };
+      }
 
-  });
+      return table;
+    });
 
+    setTables(updatedTables);
 
-  setTables(updatedTables);
+    setSelectedTable(null);
 
+    setCustomerName("");
 
-  // Close checkout modal
-  setCheckoutTable(null);
+    setPhoneNumber("");
+  };
 
-  setEndTime(null);
+  // ==========================
+  // Cancel Start
+  // ==========================
 
-};
-// ==========================
-// UI
-// ==========================
+  const handleCancel = () => {
+    setSelectedTable(null);
 
-return (
+    setCustomerName("");
 
-  <>
+    setPhoneNumber("");
+  };
 
-    <DashboardHeader />
+  // ==========================
+  // Stop Game
+  // ==========================
 
+  const handleStopGame = (id) => {
+    const table = tables.find(
+      (table) => table.id === id
+    );
 
-    <DashboardStats
-      revenueToday={revenueToday}
-      runningTables={runningTables}
-      availableTables={availableTables}
-      gamesToday={gamesToday}
-    />
-    <RunningTables tables={tables} />
+    if (!table) return;
 
+    setCheckoutTable(table);
 
-    <div className="d-flex justify-content-between align-items-center mb-3">
+    setEndTime(new Date());
+  };
 
-      <h3 className="fw-bold">
+  // ==========================
+  // Cancel Checkout
+  // ==========================
 
-        <i className="bi bi-grid-fill text-success me-2"></i>
+  const handleCancelCheckout = () => {
+    setCheckoutTable(null);
 
-        Table Status
+    setEndTime(null);
+  };
 
-      </h3>
+  // ==========================
+  // Duration
+  // ==========================
 
+  const getDurationSeconds = () => {
+    if (
+      !checkoutTable?.startTime ||
+      !endTime
+    ) {
+      return 0;
+    }
 
-      <span className="badge bg-success">
+    return Math.floor(
+      (
+        endTime -
+        new Date(checkoutTable.startTime)
+      ) / 1000
+    );
+  };
 
-        {runningTables} Running
+  const formatDuration = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
 
-      </span>
+    const minutes = Math.floor(
+      (seconds % 3600) / 60
+    );
 
-    </div>
+    const remainingSeconds = seconds % 60;
 
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
+  };
 
-    <div className="row">
+  const durationSeconds =
+    getDurationSeconds();
 
-      {tables.map((table) => (
+  const tableCharge = checkoutTable
+    ? (durationSeconds / 3600) *
+      checkoutTable.rate
+    : 0;
 
-        <div
-          key={table.id}
-          className="col-lg-3 col-md-6 mb-4"
-        >
+  // ==========================
+  // Complete Game
+  // ==========================
 
-          <TableCard
-            table={table}
-            onStartGame={handleStartGame}
-            onStopGame={handleStopGame}
-          />
+  const handleCompleteGame = () => {
+    if (!checkoutTable) return;
 
-        </div>
+    // Create completed game record
+    const completedGame = {
+      id: Date.now(),
 
-      ))}
+      tableName: checkoutTable.name,
 
-    </div>
+      tableType: checkoutTable.type,
 
+      customerName: checkoutTable.customerName,
 
-    {/* ==========================
-        Start Game Modal
-    ========================== */}
+      phoneNumber: checkoutTable.phoneNumber,
 
-    {selectedTable && (
+      startTime: checkoutTable.startTime,
 
-      <StartGameModal
-        selectedTable={selectedTable}
-        customerName={customerName}
-        phoneNumber={phoneNumber}
-        setCustomerName={setCustomerName}
-        setPhoneNumber={setPhoneNumber}
-        onCancel={handleCancel}
-        onConfirm={handleConfirmStart}
+      endTime,
+
+      durationSeconds,
+
+      rate: checkoutTable.rate,
+
+      charge: tableCharge,
+    };
+
+    // Save game to history
+    setGameHistory((previous) => [
+      completedGame,
+      ...previous,
+    ]);
+
+    // Update dashboard statistics
+    setRevenueToday((previous) =>
+      previous + tableCharge
+    );
+
+    setGamesToday((previous) =>
+      previous + 1
+    );
+
+    // Make table available again
+    const updatedTables = tables.map((table) => {
+      if (table.id === checkoutTable.id) {
+        return {
+          ...table,
+          status: "Available",
+          customerName: "",
+          phoneNumber: "",
+          startTime: null,
+        };
+      }
+
+      return table;
+    });
+
+    setTables(updatedTables);
+
+    // Close checkout modal
+    setCheckoutTable(null);
+
+    setEndTime(null);
+  };
+
+  // ==========================
+  // UI
+  // ==========================
+
+  return (
+    <div className="container py-4">
+
+      <DashboardHeader />
+
+      <DashboardStats
+        revenueToday={revenueToday}
+        runningTables={runningTables}
+        availableTables={availableTables}
+        gamesToday={gamesToday}
       />
 
-    )}
+      <RunningTables tables={tables} />
 
+      <div className="d-flex justify-content-between align-items-center mb-3">
 
-    {/* ==========================
-        Checkout Modal
-    ========================== */}
+        <h3 className="fw-bold">
+          <i className="bi bi-grid-fill text-success me-2"></i>
 
-    <CheckoutModal
-      checkoutTable={checkoutTable}
-      endTime={endTime}
-      durationSeconds={durationSeconds}
-      tableCharge={tableCharge}
-      formatDuration={formatDuration}
-      onCancel={handleCancelCheckout}
-      onComplete={handleCompleteGame}
-    />
+          Table Status
+        </h3>
 
+        <span className="badge bg-success">
+          {runningTables} Running
+        </span>
 
-  </>
+      </div>
 
-);
+      <div className="row">
+
+        {tables.map((table) => (
+          <div
+            key={table.id}
+            className="col-lg-3 col-md-6 mb-4"
+          >
+
+            <TableCard
+              table={table}
+              onStartGame={handleStartGame}
+              onStopGame={handleStopGame}
+            />
+
+          </div>
+        ))}
+
+      </div>
+
+      {/* ==========================
+          Start Game Modal
+      ========================== */}
+
+      {selectedTable && (
+        <StartGameModal
+          selectedTable={selectedTable}
+          customerName={customerName}
+          phoneNumber={phoneNumber}
+          setCustomerName={setCustomerName}
+          setPhoneNumber={setPhoneNumber}
+          onCancel={handleCancel}
+          onConfirm={handleConfirmStart}
+        />
+      )}
+
+      {/* ==========================
+          Checkout Modal
+      ========================== */}
+
+      <CheckoutModal
+        checkoutTable={checkoutTable}
+        endTime={endTime}
+        durationSeconds={durationSeconds}
+        tableCharge={tableCharge}
+        formatDuration={formatDuration}
+        onCancel={handleCancelCheckout}
+        onComplete={handleCompleteGame}
+      />
+
+    </div>
+  );
 };
 
 export default Dashboard;
-
