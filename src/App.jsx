@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
@@ -7,6 +7,7 @@ import Tables from "./pages/Tables";
 import GameHistory from "./pages/GameHistory";
 import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
+import Login from "./pages/Login";
 
 const defaultTables = [
   {
@@ -40,49 +41,35 @@ const defaultTables = [
 ];
 
 const App = () => {
-
   // ==========================
   // Load saved data
   // ==========================
 
   const [tables, setTables] = useState(() => {
-
-    const savedTables = localStorage.getItem(
-      "cuemaster_tables"
-    );
+    const savedTables = localStorage.getItem("cuemaster_tables");
 
     return savedTables
       ? JSON.parse(savedTables)
       : defaultTables;
   });
 
-
   const [revenueToday, setRevenueToday] = useState(() => {
-
-    const savedRevenue = localStorage.getItem(
-      "cuemaster_revenue"
-    );
+    const savedRevenue = localStorage.getItem("cuemaster_revenue");
 
     return savedRevenue
       ? Number(savedRevenue)
       : 0;
   });
 
-
   const [gamesToday, setGamesToday] = useState(() => {
-
-    const savedGames = localStorage.getItem(
-      "cuemaster_games"
-    );
+    const savedGames = localStorage.getItem("cuemaster_games");
 
     return savedGames
       ? Number(savedGames)
       : 0;
   });
 
-
   const [gameHistory, setGameHistory] = useState(() => {
-
     const savedHistory = localStorage.getItem(
       "cuemaster_game_history"
     );
@@ -92,80 +79,112 @@ const App = () => {
       : [];
   });
 
-
   // ==========================
   // Save tables
   // ==========================
 
   useEffect(() => {
-
     localStorage.setItem(
       "cuemaster_tables",
       JSON.stringify(tables)
     );
-
   }, [tables]);
-
 
   // ==========================
   // Save revenue
   // ==========================
 
   useEffect(() => {
-
     localStorage.setItem(
       "cuemaster_revenue",
       revenueToday.toString()
     );
-
   }, [revenueToday]);
-
 
   // ==========================
   // Save games count
   // ==========================
 
   useEffect(() => {
-
     localStorage.setItem(
       "cuemaster_games",
       gamesToday.toString()
     );
-
   }, [gamesToday]);
-
 
   // ==========================
   // Save game history
   // ==========================
 
   useEffect(() => {
-
     localStorage.setItem(
       "cuemaster_game_history",
       JSON.stringify(gameHistory)
     );
-
   }, [gameHistory]);
 
+  return <AppContent
+    tables={tables}
+    setTables={setTables}
+    revenueToday={revenueToday}
+    setRevenueToday={setRevenueToday}
+    gamesToday={gamesToday}
+    setGamesToday={setGamesToday}
+    gameHistory={gameHistory}
+    setGameHistory={setGameHistory}
+  />;
+};
+
+// ==========================================
+// App Content
+// ==========================================
+
+const AppContent = ({
+  tables,
+  setTables,
+  revenueToday,
+  setRevenueToday,
+  gamesToday,
+  setGamesToday,
+  gameHistory,
+  setGameHistory,
+}) => {
+  const location = useLocation();
+
+  const isLoginPage = location.pathname === "/login";
 
   return (
     <>
-      <Navbar />
+      {!isLoginPage && <Navbar />}
 
       <Routes>
 
-        {/* Dashboard */}
+        {/* ==========================
+            Login
+        ========================== */}
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        {/* ==========================
+            Home
+        ========================== */}
 
         <Route
           path="/"
           element={
             <Navigate
-              to="/dashboard"
+              to="/login"
               replace
             />
           }
         />
+
+        {/* ==========================
+            Dashboard
+        ========================== */}
 
         <Route
           path="/dashboard"
@@ -185,8 +204,9 @@ const App = () => {
           }
         />
 
-
-        {/* Tables */}
+        {/* ==========================
+            Tables
+        ========================== */}
 
         <Route
           path="/tables"
@@ -198,8 +218,9 @@ const App = () => {
           }
         />
 
-
-        {/* Game History */}
+        {/* ==========================
+            Game History
+        ========================== */}
 
         <Route
           path="/history"
@@ -210,8 +231,9 @@ const App = () => {
           }
         />
 
-
-        {/* Customers */}
+        {/* ==========================
+            Customers
+        ========================== */}
 
         <Route
           path="/customers"
@@ -222,8 +244,9 @@ const App = () => {
           }
         />
 
-
-        {/* Reports */}
+        {/* ==========================
+            Reports
+        ========================== */}
 
         <Route
           path="/reports"
